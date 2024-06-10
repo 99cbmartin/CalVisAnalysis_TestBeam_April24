@@ -3,14 +3,22 @@ import os
 import datetime
 import argparse
 
+
+
 def makeOutFile(descrip,ftype):
-    strpath = "testbeam_plots/"+str(datetime.date.today())+"/"
+  # strpath = "testbeam_plots/"+str(datetime.date.today())+"/"
     now = datetime.datetime.now()
-    strdatetime = now.strftime("%y-%m-%d_%H-%M")
+    year = now.strftime("%Y")
+    month = now.strftime("%B")
+    day = now.day
+    week = (now.day-1) // 7 + 1
+    #strdatetime = now.strftime("%y-%m-%d_%H-%M")
+    
+    strpath = "testbeam_plots/{}/week{}/".format(month,week)
     if not os.path.exists(strpath):
         os.makedirs(strpath)
-        
-    outFile = strpath+"testbeam_plots_run"+descrip+"_"+strdatetime+ftype
+    outFile = "{}run{}{}".format(strpath,descrip,ftype)    
+   # outFile = strpath+"testbeam_plots_run"+descrip+"_"+strdatetime+ftype
     return outFile
 
 parser = argparse.ArgumentParser()

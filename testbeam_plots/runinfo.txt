@@ -1,0 +1,4 @@
+run_582: PWO-L RG610 nm, on rear, angle on 0 degrees
+run_594: PWO-L RG610 nm, on rear, angle on 90 degrees
+run_290: PWO-L Filterless, angle on 0 degrees
+run_284: PWO-L Filterless, Angle on 90 degrees, filter name and angle wrong in json file

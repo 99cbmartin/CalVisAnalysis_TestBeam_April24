@@ -11,7 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
-
+#include <iostream>
 // Header file for the classes stored in the TTree if any.
 
 class Analysis {
@@ -22,28 +22,30 @@ public :
 // Fixed size dimensions of array or collections stored in the TTree if any.
 
    // Declaration of leaf types
-   Float_t         vertical_gain[8];
-   Float_t         vertical_offset[8];
+  // Float_t         vertical_gain[8];
+  // Float_t         vertical_offset[8];
    Float_t         horizontal_interval;
-   Double_t        horizontal_offset;
+  // Double_t        horizontal_offset;
    Int_t           event;
    Double_t        trigger_time;
-   Double_t        trigger_offset;
-   Double_t        time[1024];
-   Int_t           samples;
-   Float_t         channels[8][1024];
+  // Double_t        trigger_offset;
+  // Double_t        time[1024];
+  // Int_t           samples;
+   Float_t         channels[10][1024];
+   Float_t	   trigger[2][1024];
 
    // List of branches
-   TBranch        *b_vertical_gain;   //!
-   TBranch        *b_vertical_offset;   //!
+   //TBranch        *b_vertical_gain;   //!
+  // TBranch        *b_vertical_offset;   //!
    TBranch        *b_horizontal_interval;   //!
-   TBranch        *b_horizontal_offset;   //!
+ //  TBranch        *b_horizontal_offset;   //!
    TBranch        *b_event;   //!
    TBranch        *b_trigger_time;   //!
-   TBranch        *b_trigger_offset;   //!
-   TBranch        *b_time;   //!
-   TBranch        *b_samples;   //!
+   //TBranch        *b_trigger_offset;   //!
+   //TBranch        *b_time;   //!
+   //TBranch        *b_samples;   //!
    TBranch        *b_channels;   //!
+   TBranch	  *b_trigger; //!
 
    Analysis(TTree *tree=0);
    virtual ~Analysis();
@@ -64,11 +66,13 @@ Analysis::Analysis(TTree *tree) : fChain(0)
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree.
    if (tree == 0) {
-      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../bc-35v-tbbox.root");
-      if (!f || !f->IsOpen()) {
-         f = new TFile("../bc-35v-tbbox.root");
-      }
-      f->GetObject("tree",tree);
+std::cerr << "Error: No TTree of TChain" << std::endl;
+std::exit(EXIT_FAILURE);
+//      TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("../../store/shared/calvision/run_285/outfile_LG.root");
+  //    if (!f || !f->IsOpen()) {
+    //     f = new TFile("../../store/shared/calvision/run_285/outfile_LG.root");
+    //  }
+     // f->GetObject("tree",tree);
 
    }
    Init(tree);
@@ -115,16 +119,17 @@ void Analysis::Init(TTree *tree)
    fCurrent = -1;
    fChain->SetMakeClass(1);
 
-   fChain->SetBranchAddress("vertical_gain", vertical_gain, &b_vertical_gain);
-   fChain->SetBranchAddress("vertical_offset", vertical_offset, &b_vertical_offset);
+  // fChain->SetBranchAddress("vertical_gain", vertical_gain, &b_vertical_gain);
+   //fChain->SetBranchAddress("vertical_offset", vertical_offset, &b_vertical_offset);
    fChain->SetBranchAddress("horizontal_interval", &horizontal_interval, &b_horizontal_interval);
-   fChain->SetBranchAddress("horizontal_offset", &horizontal_offset, &b_horizontal_offset);
+  // fChain->SetBranchAddress("horizontal_offset", &horizontal_offset, &b_horizontal_offset);
    fChain->SetBranchAddress("event", &event, &b_event);
    fChain->SetBranchAddress("trigger_time", &trigger_time, &b_trigger_time);
-   fChain->SetBranchAddress("trigger_offset", &trigger_offset, &b_trigger_offset);
-   fChain->SetBranchAddress("time", time, &b_time);
-   fChain->SetBranchAddress("samples", &samples, &b_samples);
+  // fChain->SetBranchAddress("trigger_offset", &trigger_offset, &b_trigger_offset);
+  // fChain->SetBranchAddress("time", time, &b_time);
+ //  fChain->SetBranchAddress("samples", &samples, &b_samples);
    fChain->SetBranchAddress("channels", channels, &b_channels);
+   fChain->SetBranchAddress("trigger",trigger,&b_trigger);
    Notify();
 }
 
