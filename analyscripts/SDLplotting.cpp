@@ -77,12 +77,12 @@ int main() {
 	    residual[ich][del]->SetLineColor(kGreen);
 	    residual[ich][del]->SetLineWidth(2);
             agraphU->SetLineColor(kBlue);
-            graphU->SetLineWidth(2);
+           agraphU->SetLineWidth(2);
             graphF->SetLineColor(kRed);
             graphF->SetLineWidth(2);
 
-            graphU->GetXaxis()->SetTitle("t - t_{trig} (ns)");
-            graphU->GetYaxis()->SetTitle("a(t) - a(t-d)");
+            agraphU->GetXaxis()->SetTitle("t - t_{trig} (ns)");
+            agraphU->GetYaxis()->SetTitle("a(t) - a(t-d)");
 	    graphF->GetXaxis()->SetTitle("t - t_{MCP} (ns)");
             graphF->GetYaxis()->SetTitle("a(t) - a(t-d)");
 	    agraphU->SetTitle(Form("Channel %d Delay %d ns",ich,del+1));
@@ -105,10 +105,10 @@ int main() {
             legend->AddEntry(graphF, "Filtered", "l");
 	    legend->AddEntry(residual[ich][del],"Residual","l");
             legend->Draw();
-
-            canvas->Print(Form("../testbeam_plots/July/week4/SDLFVU_Align/SDL_Ch%d_del%d.png", ich, del));
-
-            delete legend;
+		//if(ich < 4){
+            canvas->SaveAs(Form("../SDLFVU_Align/SDL_Ch%d_del%d.C", ich, del));
+//	}
+          delete legend;
             delete canvas;
         }
     }
