@@ -5,29 +5,47 @@
 #include <iostream>
 #include <TAxis.h>
 #include <TMath.h>
+double alignmentsetup(TGraph* graph, int ich){
+int NumP = graph->GetN();
+double* XValues = graph ->GetX();
+double* YValues = graph->GetY();
+double minY = std::numeric_limits<double>::max();
+double halfmax = 0.0;
+double Xlim = 0.0;
+int turnpoint = 0;
+double x = 100000;
+//double xstep = 0;
+	for (int i = 0; i < NumP -1; i++){
+		if (ich == 0){
+//		std::cout<<"y values are: "<<YValues[i]<<std::endl;
+	}	if (minY > YValues[i]){
+			minY = YValues[i];
+			Xlim = XValues[i];
+			turnpoint = i;
+		}
+		halfmax = minY/2;
+	}
+		
+	std::cout<<"The Min for channel ("<<ich<<") is: "<<minY<< " mV...and that happens at: "<<Xlim<<" ns"<<std::endl;
+		
 
-double GetXpoint(TGraph* graph, double yValue){
-int NumP = graph -> GetN();
-double* xValues = graph->GetX();
-double*  yValues = graph->GetY();
+	for (int j = 0; j < turnpoint ; j++){
+		
+		if ((YValues[j] <= halfmax && YValues[j+1] >= halfmax) || (YValues[j] >= halfmax && YValues[j+1] <= halfmax)) {
+             		double x1 = XValues[j];
+             		double x2 = XValues[j+1];
+             		double y1 = YValues[j];
+             		double y2 = YValues[j+1];
+            		//(x - x1) / (x2 - x1) = (halfmax - y1) / (y2 - y1)
+                        double x = x1 + (halfmax - y1) * (x2 - x1) / (y2 - y1);
+                        return x;
+             
+		}		
+	}
 
-for (int i = 0; i < NumP-1 ; i++){
-	 if ((yValues[i] <= yValue && yValues[i+1] >= yValue) || (yValues[i] >= yValue && yValues[i+1] <= yValue)) {
-             double x1 = xValues[i];
-             double x2 = xValues[i+1];
-             double y1 = yValues[i];
-             double y2 = yValues[i+1];
-             //(x - x1) / (x2 - x1) = (yValue - y1) / (y2 - y1)
-             double x = x1 + (yValue - y1) * (x2 - x1) / (y2 - y1);
-             return x;
-
-
+ return x;
 }
 
-}
-std::cerr << "Warning: Specified yValue is out of the range of the graph." << std::endl;
-    return -1;
-}
 
 
 int main() {
@@ -48,29 +66,33 @@ int main() {
             TGraph* agraphU = new TGraph();  	
 	    double* xU = graphU->GetX();
 	    double* yU = graphU->GetY();
+	    double* xF = graphF->GetX();
 	    double* yF = graphF->GetY();
+	    int overlap = 0;
 	    double alignedxU[graphU->GetN()];
             if (!graphU || !graphF) {
                 std::cerr << "Error: Could not find graphs " << nameU << " or " << nameF << " in file!" << std::endl;
                 continue;
             }
 
-            double maxU = graphU->GetY()[TMath::LocMax(graphU->GetN(), graphU->GetY())];
-            double maxF = graphF->GetY()[TMath::LocMax(graphF->GetN(), graphF->GetY())];
-	    double AtU = GetXpoint(graphU,maxU/2);
-	    double AtF = GetXpoint(graphF,maxF/2);
+	    double AtU = alignmentsetup(graphU,ich);
+	    double AtF = alignmentsetup(graphF,ich);
 	    double timediff = AtU-AtF;
+	   std::cout<<"The time diff for channel ("<<ich<<") is: "<<timediff<<std::endl;
            for (int i = 0; i < graphU->GetN()-1; i++){
 		if(timediff < 0){
 		alignedxU[i] = xU[i]-timediff;
 		}else{
 		alignedxU[i]=xU[i]+timediff;
 		}
+		if(alignedxU[i] == xF[i]){
+		overlap++;
+		}
 		agraphU->SetPoint(i,alignedxU[i], yU[i]);	
                 residual[ich][del]->SetPoint(i,alignedxU[i],yU[i]-yF[i]);
 
             }	
-	
+	std::cout<<"overlap: "<<overlap<<std::endl;
 
             TCanvas* canvas = new TCanvas("canvas", "Canvas", 800, 600);
             canvas->cd();
@@ -90,15 +112,15 @@ int main() {
 	    agraphU->GetXaxis()->SetRangeUser(0,500);
 	    graphF->GetXaxis()->SetRangeUser(0,500);	
             // Draw the graphs with the larger maximum first
-            if (maxU > maxF) {
-                agraphU->Draw("AL");
-                graphF->Draw("L SAME");
-		residual[ich][del]->Draw("L SAME");
-            } else {
+          //  if (maxU > maxF) {
+           //     agraphU->Draw("AL");
+            //    graphF->Draw("L SAME");
+//		residual[ich][del]->Draw("L SAME");
+  //          } else {
                 graphF->Draw("AL");
                 agraphU->Draw("L SAME");
 		residual[ich][del]->Draw("L SAME");
-            }
+    //        }
 
             TLegend* legend = new TLegend(0.75, 0.75, 0.9, 0.9);
             legend->AddEntry(agraphU, "Unfiltered", "l");
@@ -106,7 +128,7 @@ int main() {
 	    legend->AddEntry(residual[ich][del],"Residual","l");
             legend->Draw();
 		//if(ich < 4){
-            canvas->SaveAs(Form("../SDLFVU_Align/SDL_Ch%d_del%d.C", ich, del));
+            canvas->SaveAs(Form("../SDLFVU_Align/SDL_Ch%d_del%d.png", ich, del));
 //	}
           delete legend;
             delete canvas;
