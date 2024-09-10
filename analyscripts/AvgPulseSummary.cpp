@@ -28,7 +28,6 @@ double getMaxValue(TGraph* graph) {
     return max;
 }
 
-// Function to draw TGraphs on a canvas
 void drawGraphsOnCanvas(TCanvas* canvas, const std::vector<TGraph*>& graphs, const std::vector<Color_t>& colors) {
     canvas->cd();
     std::vector<std::pair<TGraph*, double>> graphMaxPairs;
@@ -53,17 +52,13 @@ void processFile(const char* filename) {
         return;
     }
 
-    // Define colors for graphs
     Color_t colors[] = {kRed, kBlue, kGreen, kMagenta, kCyan, kYellow};
 
-    // Create vectors to store TGraphs
     std::vector<TGraph*> graphs1, graphs2, graphs3;
 
-    // Channels to use
     int channels1[] = {0, 1, 2, 3};
     int channels2[] = {4, 7};
 
-    // Create graphs for first canvas
     for (int ch : channels1) {
         TProfile* profile = dynamic_cast<TProfile*>(file->Get(TString::Format("AveragePulse_Ch%d", ch)));
         if (profile) {
@@ -75,7 +70,6 @@ void processFile(const char* filename) {
         }
     }
 
-    // Create graphs for second canvas
     for (int ch : channels2) {
         TProfile* profile = dynamic_cast<TProfile*>(file->Get(TString::Format("AveragePulse_Ch%d", ch)));
         if (profile) {
@@ -87,7 +81,6 @@ void processFile(const char* filename) {
         }
     }
 
-    // Create canvases and draw graphs
     TCanvas* canvas1 = new TCanvas("canvas1", "AveragePulse_Ch0-Ch3", 800, 600);
     drawGraphsOnCanvas(canvas1, graphs1, std::vector<Color_t>(colors, colors + graphs1.size()));
     canvas1->SaveAs(TString::Format("%s_Canvas1.png", filename));
@@ -100,7 +93,6 @@ void processFile(const char* filename) {
     drawGraphsOnCanvas(canvas3, graphs3, std::vector<Color_t>(colors, colors + graphs3.size()));
     canvas3->SaveAs(TString::Format("%s_Canvas3.png", filename));
 
-    // Clean up
     delete canvas1;
     delete canvas2;
     delete canvas3;
